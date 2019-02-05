@@ -19,6 +19,7 @@
     "start": "../../utils/scripts/start.sh"
   },
   "dependencies": {
+    "@zendeskgarden/container-selections": "/Users/agreen/Repos/react-containers/packages/selection",
     "@zendeskgarden/react-selection": "^4.6.2",
     "classnames": "^2.2.5"
   },
@@ -43,5 +44,5 @@
     "access": "public"
   },
   "zendeskgarden:library": "GardenPagination",
-  "zendeskgarden:src": "src/index.js"
+  "zendeskgarden:src": "src-new/index.js"
 }
