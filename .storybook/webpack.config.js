@@ -24,5 +24,11 @@ module.exports = (baseConfig, env, defaultConfig) => {
     })
   );
 
+  defaultConfig.module.rules[3].test = /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2|cur|ani)(\?.*)?$/;
+  defaultConfig.module.rules.push({
+    test: /\.svg$/,
+    use: ['@svgr/webpack']
+  });
+
   return defaultConfig;
 };

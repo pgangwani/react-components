@@ -3,6 +3,8 @@ import { withOptions } from '@storybook/addon-options';
 import { withInfo } from '@storybook/addon-info';
 import centered from '@storybook/addon-centered';
 
+import '../utils/styleguide/styles.css';
+
 // automatically import all files ending in *.stories.js
 const req = require.context('../packages/pagination/src-new', true, /.stories.js$/);
 

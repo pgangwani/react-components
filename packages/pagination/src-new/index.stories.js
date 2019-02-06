@@ -11,6 +11,7 @@ import { Button } from '@storybook/react/demo';
 import README from '../README.md';
 
 import {
+  Pagination,
   usePagination,
   StyledPagination,
   StyledPreviousPage,
@@ -20,7 +21,7 @@ import {
 } from './index';
 
 storiesOf('Pagination / Examples', module)
-  .add('Default usage', () => <Button>Hello Button</Button>)
+  .add('Default usage', () => <Pagination />)
   .add('Custom Example 1', () => <Button>Hello Button</Button>)
   .add('Custom Example 2', () => <Button>Hello Button</Button>);
 

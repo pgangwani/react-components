@@ -12,15 +12,15 @@ import { useSelection } from '@zendeskgarden/container-selection';
  *
  * https://www.w3.org/TR/wai-aria-practices/#Listbox
  */
-export default function usePagination({ refs = [] } = {}) {
+export default function usePagination(options) {
   const {
     selectedIndex,
     focusedIndex,
     getItemProps,
     getContainerProps: getSelectionContainerProps
-  } = useSelection({
-    refs
-  });
+  } = useSelection(options);
+
+  // console.log(options.refs);
 
   const getContainerProps = (props = {}) => {
     return {
