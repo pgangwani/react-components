@@ -91,7 +91,7 @@ function useSelection({
     focusRef,
     ...other
   } = {}) => {
-    if (item === undefined) {
+    if (item === undefined || focusRef === undefined) {
       throw new Error('You messed up');
     }
 

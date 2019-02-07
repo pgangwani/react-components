@@ -13,6 +13,7 @@ import README from '../README.md';
 import {
   Pagination,
   usePagination,
+  useSelection,
   StyledPagination,
   StyledPreviousPage,
   StyledNextPage,
@@ -62,96 +63,127 @@ storiesOf('Pagination / Examples', module)
     return <DefaultPaginationExample />;
   });
 
-storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
-  const HookExample = () => {
-    const [controlledSelectedItem, setControlledSelectedItem] = useState();
-    const [controlledFocusedItem, setControlledFocusedItem] = useState();
-    const prevPageRef = useRef();
-    const nextPageRef = useRef();
-    const page1Ref = useRef();
-    const page2Ref = useRef();
-    const page3Ref = useRef();
+storiesOf('Pagination / Hooks', module)
+  .add('useSelection()', () => {
+    const SelectionHookExample = () => {
+      const refs = [useRef(), useRef(), useRef()];
 
-    const {
-      selectedItem,
-      focusedItem,
-      getContainerProps,
-      getPageProps,
-      getPreviousPageProps,
-      getNextPageProps
-    } = usePagination({
-      selectedItem: controlledSelectedItem,
-      focusedItem: controlledFocusedItem,
-      onSelect: item => setControlledSelectedItem(item),
-      onFocus: item => setControlledFocusedItem(item)
-    });
+      const [controlledSelectedItem, setControlledSelectedItem] = useState(1);
+      const [controlledFocusedItem, setControlledFocusedItem] = useState(1);
 
-    return (
-      <StyledPagination {...getContainerProps()}>
-        <StyledPreviousPage
-          {...getPreviousPageProps({
-            ref: prevPageRef,
-            focusRef: prevPageRef,
-            item: 'prev',
-            current: selectedItem === 'prev',
-            focused: focusedItem === 'prev'
-          })}
-        >
-          {'<'}
-        </StyledPreviousPage>
-        <StyledPage
-          {...getPageProps({
-            ref: page1Ref,
-            focusRef: page1Ref,
-            page: '1',
-            item: '1',
-            current: selectedItem === '1',
-            focused: focusedItem === '1'
-          })}
-        >
-          1
-        </StyledPage>
-        <StyledPage
-          {...getPageProps({
-            ref: page2Ref,
-            focusRef: page2Ref,
-            page: '2',
-            item: '2',
-            current: selectedItem === '2',
-            focused: focusedItem === '2'
-          })}
-        >
-          2
-        </StyledPage>
-        <StyledPage
-          {...getPageProps({
-            ref: page3Ref,
-            focusRef: page3Ref,
-            page: '3',
-            item: '3',
-            current: selectedItem === '3',
-            focused: focusedItem === '3'
-          })}
-        >
-          3
-        </StyledPage>
-        <StyledNextPage
-          {...getNextPageProps({
-            ref: nextPageRef,
-            focusRef: nextPageRef,
-            item: 'next',
-            current: selectedItem === 'next',
-            focused: focusedItem === 'next'
-          })}
-        >
-          {'>'}
-        </StyledNextPage>
-      </StyledPagination>
-    );
-  };
+      const { selectedItem, getContainerProps, getItemProps } = useSelection({
+        selectedItem: controlledSelectedItem,
+        focusedItem: controlledFocusedItem,
+        onFocus: setControlledFocusedItem,
+        onSelect: setControlledSelectedItem,
+        direction: 'vertical'
+      });
 
-  return <HookExample />;
-});
+      const isSelected = index => index === selectedItem;
+
+      return (
+        <ul {...getContainerProps()}>
+          {refs.map((ref, index) => (
+            <li {...getItemProps({ item: index, ref, focusRef: ref })}>
+              Item {index} {isSelected(index) && ' - Selected'}
+            </li>
+          ))}
+        </ul>
+      );
+    };
+
+    return <SelectionHookExample />;
+  })
+  .add('usePagination()', () => {
+    const HookExample = () => {
+      const [controlledSelectedItem, setControlledSelectedItem] = useState();
+      const [controlledFocusedItem, setControlledFocusedItem] = useState();
+      const prevPageRef = useRef();
+      const nextPageRef = useRef();
+      const page1Ref = useRef();
+      const page2Ref = useRef();
+      const page3Ref = useRef();
+
+      const {
+        selectedItem,
+        focusedItem,
+        getContainerProps,
+        getPageProps,
+        getPreviousPageProps,
+        getNextPageProps
+      } = usePagination({
+        selectedItem: controlledSelectedItem,
+        focusedItem: controlledFocusedItem,
+        onSelect: item => setControlledSelectedItem(item),
+        onFocus: item => setControlledFocusedItem(item)
+      });
+
+      return (
+        <StyledPagination {...getContainerProps()}>
+          <StyledPreviousPage
+            {...getPreviousPageProps({
+              ref: prevPageRef,
+              focusRef: prevPageRef,
+              item: 'prev',
+              current: selectedItem === 'prev',
+              focused: focusedItem === 'prev'
+            })}
+          >
+            {'<'}
+          </StyledPreviousPage>
+          <StyledPage
+            {...getPageProps({
+              ref: page1Ref,
+              focusRef: page1Ref,
+              page: '1',
+              item: '1',
+              current: selectedItem === '1',
+              focused: focusedItem === '1'
+            })}
+          >
+            1
+          </StyledPage>
+          <StyledPage
+            {...getPageProps({
+              ref: page2Ref,
+              focusRef: page2Ref,
+              page: '2',
+              item: '2',
+              current: selectedItem === '2',
+              focused: focusedItem === '2'
+            })}
+          >
+            2
+          </StyledPage>
+          <StyledPage
+            {...getPageProps({
+              ref: page3Ref,
+              focusRef: page3Ref,
+              page: '3',
+              item: '3',
+              current: selectedItem === '3',
+              focused: focusedItem === '3'
+            })}
+          >
+            3
+          </StyledPage>
+          <StyledNextPage
+            {...getNextPageProps({
+              ref: nextPageRef,
+              focusRef: nextPageRef,
+              item: 'next',
+              current: selectedItem === 'next',
+              focused: focusedItem === 'next'
+            })}
+          >
+            {'>'}
+          </StyledNextPage>
+        </StyledPagination>
+      );
+    };
+
+    return <HookExample />;
+  });
 
 storiesOf('Pagination / Styled Elements', module)
   .addParameters({

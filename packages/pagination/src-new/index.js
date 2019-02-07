@@ -7,4 +7,5 @@
 
 export { default as Pagination } from './Pagination';
 export { default as usePagination } from './usePagination';
+export { default as useSelection } from './useSelection';
 export * from './styled-elements';
