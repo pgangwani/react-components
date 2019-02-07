@@ -7,7 +7,6 @@
 
 import React, { useState, useRef } from 'react';
 import { storiesOf } from '@storybook/react';
-import { Button } from '@storybook/react/demo';
 import { withKnobs, number, boolean } from '@storybook/addon-knobs';
 import README from '../README.md';
 
@@ -61,9 +60,7 @@ storiesOf('Pagination / Examples', module)
     };
 
     return <DefaultPaginationExample />;
-  })
-  .add('Custom Example 1', () => <Button>Hello Button</Button>)
-  .add('Custom Example 2', () => <Button>Hello Button</Button>);
+  });
 
 storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
   const HookExample = () => {
