@@ -12,6 +12,8 @@ import { zdColorGrey800 } from '@zendeskgarden/css-variables';
 import ChevronLeftIcon from '@zendeskgarden/svg-icons/src/16/chevron-left-stroke.svg';
 import ChevronRightIcon from '@zendeskgarden/svg-icons/src/16/chevron-right-stroke.svg';
 
+import retrieveOverrideStyles from './utils/retrieveOverrideStyles';
+
 export const StyledPagination = styled.ul.attrs({
   'data-garden-id': 'pagination.pagination_view',
   'data-garden-version': PACKAGE_VERSION
@@ -28,13 +30,14 @@ export const StyledPagination = styled.ul.attrs({
   padding: 0;
   list-style: none;
   white-space: nowrap;
+
+  ${props => retrieveOverrideStyles(props)};
 `;
 
 StyledPagination.displayName = 'StyledPagination';
 
 const commonPageStyling = css`
   display: inline-block;
-  transition: background 0.25s ease-in-out, box-shadow 0.1s ease-in-out, color 0.25s ease-in-out;
   margin-left: 4px;
   border-radius: 4px;
   cursor: pointer;
@@ -85,6 +88,8 @@ export const StyledPage = styled.li.attrs({
     box-shadow: none;
     background-color: rgba(104, 115, 125, 0.25);
   }
+
+  ${props => retrieveOverrideStyles(props)};
 `;
 
 StyledPage.propTypes = {
@@ -129,6 +134,8 @@ const StyledNextPageWrapper = styled.li.attrs({
     `
     visibility: hidden;
   `}
+
+  ${props => retrieveOverrideStyles(props)};
 `;
 
 export const StyledNextPage = React.forwardRef((props, ref) => (
@@ -152,10 +159,28 @@ const StyledPreviousPageWrapper = styled(StyledPage).attrs({
   justify-content: center;
 
   ${props =>
+    props.focused &&
+    `
+    ${styledNextPageWrapperHoveredStyling}
+
+    background-color: rgba(104, 115, 125, .15);
+  `}
+
+  &:hover {
+    ${styledNextPageWrapperHoveredStyling}
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  ${props =>
     props.hidden &&
     `
     visibility: hidden;
   `}
+
+  ${props => retrieveOverrideStyles(props)};
 `;
 
 export const StyledPreviousPage = React.forwardRef((props, ref) => (
@@ -176,4 +201,6 @@ export const StyledGap = styled(StyledPage).attrs({
   'data-garden-version': PACKAGE_VERSION
 })`
   font-size: 16px;
+
+  ${props => retrieveOverrideStyles(props)};
 `;

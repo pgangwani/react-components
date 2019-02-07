@@ -5,7 +5,7 @@
  * found at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-import { useSelection } from '@zendeskgarden/container-selection';
+import useRovingTabIndex from './useRovingTabIndex';
 
 /**
  * A React Hook used to create accessible widgets with the Pagination Interaction Pattern
@@ -14,13 +14,11 @@ import { useSelection } from '@zendeskgarden/container-selection';
  */
 export default function usePagination(options) {
   const {
-    selectedIndex,
-    focusedIndex,
-    getItemProps,
-    getContainerProps: getSelectionContainerProps
-  } = useSelection(options);
-
-  // console.log(options.refs);
+    selectedItem,
+    focusedItem,
+    getContainerProps: getControlledContainerProps,
+    getItemProps
+  } = useRovingTabIndex(options);
 
   const getContainerProps = (props = {}) => {
     return {
@@ -58,10 +56,10 @@ export default function usePagination(options) {
   };
 
   return {
-    selectedIndex,
-    focusedIndex,
+    selectedItem,
+    focusedItem,
+    getContainerProps: props => getControlledContainerProps(getContainerProps(props)),
     getPageProps: props => getItemProps(getPageProps(props)),
-    getContainerProps: props => getSelectionContainerProps(getContainerProps(props)),
     getPreviousPageProps: props => getItemProps(getPreviousPageProps(props)),
     getNextPageProps: props => getItemProps(getNextPageProps(props))
   };

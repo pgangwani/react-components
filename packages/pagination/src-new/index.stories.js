@@ -5,9 +5,10 @@
  * found at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { storiesOf } from '@storybook/react';
 import { Button } from '@storybook/react/demo';
+import { withKnobs, number, boolean } from '@storybook/addon-knobs';
 import README from '../README.md';
 
 import {
@@ -21,12 +22,53 @@ import {
 } from './index';
 
 storiesOf('Pagination / Examples', module)
-  .add('Default usage', () => <Pagination />)
+  .addDecorator(withKnobs)
+  .add('Default usage', () => {
+    const DefaultPaginationExample = () => {
+      const [currentPage, setCurrentPage] = useState(1);
+
+      const CustomGap = () => {
+        return (
+          <span role="img" aria-label="It's a hook!" style={{ marginLeft: 8, marginRight: 8 }}>
+            🎣
+          </span>
+        );
+      };
+
+      const overrides = {};
+
+      if (boolean('Show Pagination Override', false)) {
+        overrides.Pagination = {
+          css: `border: ${currentPage > 5 ? 'red' : 'blue'} 4px solid`
+        };
+      }
+
+      if (boolean('Show Custom Render Override', false)) {
+        overrides.Gap = {
+          render: CustomGap
+        };
+      }
+
+      return (
+        <Pagination
+          currentPage={currentPage}
+          onChange={setCurrentPage}
+          totalPages={number('totalPages', 25)}
+          pagePadding={number('pagePadding', 2)}
+          overrides={overrides}
+        />
+      );
+    };
+
+    return <DefaultPaginationExample />;
+  })
   .add('Custom Example 1', () => <Button>Hello Button</Button>)
   .add('Custom Example 2', () => <Button>Hello Button</Button>);
 
 storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
   const HookExample = () => {
+    const [controlledSelectedItem, setControlledSelectedItem] = useState();
+    const [controlledFocusedItem, setControlledFocusedItem] = useState();
     const prevPageRef = useRef();
     const nextPageRef = useRef();
     const page1Ref = useRef();
@@ -34,21 +76,28 @@ storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
     const page3Ref = useRef();
 
     const {
-      selectedIndex,
-      focusedIndex,
+      selectedItem,
+      focusedItem,
       getContainerProps,
       getPageProps,
       getPreviousPageProps,
       getNextPageProps
-    } = usePagination({ refs: [prevPageRef, page1Ref, page2Ref, page3Ref, nextPageRef] });
+    } = usePagination({
+      selectedItem: controlledSelectedItem,
+      focusedItem: controlledFocusedItem,
+      onSelect: item => setControlledSelectedItem(item),
+      onFocus: item => setControlledFocusedItem(item)
+    });
 
     return (
       <StyledPagination {...getContainerProps()}>
         <StyledPreviousPage
           {...getPreviousPageProps({
             ref: prevPageRef,
-            current: selectedIndex === 0,
-            focused: focusedIndex === 0
+            focusRef: prevPageRef,
+            item: 'prev',
+            current: selectedItem === 'prev',
+            focused: focusedItem === 'prev'
           })}
         >
           {'<'}
@@ -56,9 +105,11 @@ storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
         <StyledPage
           {...getPageProps({
             ref: page1Ref,
+            focusRef: page1Ref,
             page: '1',
-            current: selectedIndex === 1,
-            focused: focusedIndex === 1
+            item: '1',
+            current: selectedItem === '1',
+            focused: focusedItem === '1'
           })}
         >
           1
@@ -66,9 +117,11 @@ storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
         <StyledPage
           {...getPageProps({
             ref: page2Ref,
+            focusRef: page2Ref,
             page: '2',
-            current: selectedIndex === 2,
-            focused: focusedIndex === 2
+            item: '2',
+            current: selectedItem === '2',
+            focused: focusedItem === '2'
           })}
         >
           2
@@ -76,9 +129,11 @@ storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
         <StyledPage
           {...getPageProps({
             ref: page3Ref,
+            focusRef: page3Ref,
             page: '3',
-            current: selectedIndex === 3,
-            focused: focusedIndex === 3
+            item: '3',
+            current: selectedItem === '3',
+            focused: focusedItem === '3'
           })}
         >
           3
@@ -86,8 +141,10 @@ storiesOf('Pagination / Hooks', module).add('usePagination()', () => {
         <StyledNextPage
           {...getNextPageProps({
             ref: nextPageRef,
-            current: selectedIndex === 4,
-            focused: focusedIndex === 4
+            focusRef: nextPageRef,
+            item: 'next',
+            current: selectedItem === 'next',
+            focused: focusedItem === 'next'
           })}
         >
           {'>'}

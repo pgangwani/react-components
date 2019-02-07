@@ -6,6 +6,8 @@
  */
 
 import React, { useRef, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import getOverrides from './utils/getOverrides';
 import usePagination from './usePagination';
 import {
   StyledPagination,
@@ -14,222 +16,232 @@ import {
   StyledNextPage,
   StyledGap
 } from './styled-elements';
-// import PropTypes from 'prop-types';
 
 /**
- * Test docs
+ * Example Pagination component with hooks 🎣
  */
-function Pagination() {
+function Pagination({
+  currentPage = 1,
+  totalPages = 25,
+  pagePadding = 2,
+  overrides = {},
+  onChange
+}) {
+  const [OverridePagination, overridePaginationProps] = getOverrides(
+    overrides.Pagination,
+    StyledPagination
+  );
+  const [OverridePreviousPage, overridePreviousPageProps] = getOverrides(
+    overrides.PreviousPage,
+    StyledPreviousPage
+  );
+  const [OverridePage, overridePageProps] = getOverrides(overrides.Page, StyledPage);
+  const [OverrideNextPage, overrideNextPageProps] = getOverrides(
+    overrides.NextPage,
+    StyledNextPage
+  );
+  const [OverrideGap, overrideGapProps] = getOverrides(overrides.Gap, StyledGap);
+
   const previousPageRef = useRef();
   const nextPageRef = useRef();
-  const numPages = 5;
-  const pageRefs = [];
 
-  for (let x = 0; x < numPages; x++) {
-    pageRefs.push(React.createRef());
-  }
-
-  const [controlledFocusedIndex, setControlledFocusedIndex] = useState(0);
-  const [controlledSelectedIndex, setControlledSelectedIndex] = useState(0);
+  const [controlledFocusedItem, setControlledFocusedItem] = useState();
 
   const [isPrevHidden, setIsPrevHidden] = useState(false);
   const [isNextHidden, setIsNextHidden] = useState(false);
 
-  const previousSelectedIndex = useRef();
-  const previousFocusedIndex = useRef();
-
-  const refs = [];
-
-  if (!isPrevHidden) {
-    refs.push(previousPageRef);
-  }
-
-  refs.push(...pageRefs);
-
-  if (!isNextHidden) {
-    refs.push(nextPageRef);
-  }
-
   const {
-    selectedIndex,
-    focusedIndex,
+    selectedItem,
+    focusedItem,
     getContainerProps,
     getNextPageProps,
     getPreviousPageProps,
     getPageProps
   } = usePagination({
-    refs: [...refs],
-    selectedIndex: controlledSelectedIndex,
-    focusedIndex: controlledFocusedIndex,
-    onFocus: newFocus => {
-      // console.log(newFocus);
-      setControlledFocusedIndex(newFocus);
-    },
-    onSelection: newSelection => {
-      debugger;
-      let updatedNewSelection = newSelection;
+    selectedItem: currentPage,
+    focusedItem: controlledFocusedItem,
+    onFocus: newFocusedItem => setControlledFocusedItem(newFocusedItem),
+    onSelect: newSelectedItem => {
+      let modifiedNewSelectedItem = newSelectedItem;
 
-      const isPrevious = refs[newSelection].current === previousPageRef.current;
-      const isNext = refs[newSelection].current === nextPageRef.current;
-
-      if (isPrevious) {
-        if (previousSelectedIndex.current > 1) {
-          updatedNewSelection = previousSelectedIndex.current - 1;
-        } else {
-          updatedNewSelection = 0;
-          setIsPrevHidden(true);
-        }
-      } else if (isNext) {
-        if (previousSelectedIndex.current < refs.length - 3) {
-          updatedNewSelection = previousSelectedIndex.current + 1;
-        } else {
-          updatedNewSelection = refs.length - 2;
-          setIsNextHidden(true);
-        }
+      if (newSelectedItem === 'prev' && selectedItem > 1) {
+        modifiedNewSelectedItem = selectedItem - 1;
+      } else if (modifiedNewSelectedItem === 'next' && selectedItem < totalPages) {
+        modifiedNewSelectedItem = selectedItem + 1;
       }
 
-      setControlledSelectedIndex(updatedNewSelection);
+      if (modifiedNewSelectedItem !== selectedItem) {
+        onChange && onChange(modifiedNewSelectedItem);
+      }
     }
   });
 
-  // console.log('Selected', selectedIndex);
-  // console.log('Focused', focusedIndex);
-  // console.log('Refs', refs);
-
   useEffect(
     () => {
-      // refs.current = [];
-      // if (!isPrevHidden) {
-      //   refs.current.push(previousPageRef);
-      // }
-      // refs.current.push(...pageRefs);
-      // if (!isNextHidden) {
-      //   refs.current.push(nextPageRef);
-      // }
-      // if (!isPrevHidden || !isNextHidden) {
-      //   setControlledFocusedIndex(focusedIndex - 1);
-      //   setControlledSelectedIndex(selectedIndex - 1);
-      // }
+      if (currentPage === 1) {
+        setIsPrevHidden(true);
+
+        if (focusedItem === 'prev') {
+          setControlledFocusedItem(1);
+        }
+      } else {
+        setIsPrevHidden(false);
+      }
+
+      if (currentPage === totalPages) {
+        setIsNextHidden(true);
+
+        if (focusedItem === 'next') {
+          setControlledFocusedItem(totalPages);
+        }
+      } else {
+        setIsNextHidden(false);
+      }
     },
-    [isPrevHidden, isNextHidden]
+    [currentPage]
   );
 
-  useEffect(
-    () => {
-      previousSelectedIndex.current = selectedIndex;
-      previousFocusedIndex.current = focusedIndex;
-    },
-    [selectedIndex, focusedIndex]
-  );
+  const createPage = page => {
+    const pageRef = React.createRef();
 
-  // useEffect(
-  //   () => {
-  //     setControlledFocusedIndex(focusedIndex);
-  //   },
-  //   [focusedIndex]
-  // );
-
-  // useEffect(
-  //   () => {
-  //     let newSelectedIndex = selectedIndex;
-  //     let newFocusedIndex = focusedIndex;
-
-  //     const isPrevious = newSelectedIndex === 0;
-
-  //     if (isPrevious) {
-  //       // debugger;
-  //       if (controlledSelectedIndex > 1) {
-  //         newSelectedIndex = controlledSelectedIndex - 1;
-  //       } else {
-  //         newSelectedIndex = 1;
-  //       }
-  //     }
-
-  //     setControlledSelectedIndex(newSelectedIndex);
-  //     setControlledFocusedIndex(newFocusedIndex);
-  //   },
-  //   [selectedIndex, focusedIndex]
-  // );
-  // useEffect(
-  //   () => {
-  //     console.log('Newly Selected:', selectedIndex);
-  //     debugger;
-
-  //     setControlledSelectedIndex(2);
-
-  //     // if (selectedIndex === 0) {
-  //     //   // Previous selected
-
-  //     //   if (selectedIndex > 1) {
-  //     //     setControlledSelectedIndex(selectedIndex - 1);
-  //     //   } else {
-  //     //     setControlledSelectedIndex(1);
-  //     //   }
-  //     // } else {
-  //     //   setControlledSelectedIndex(selectedIndex);
-  //     // }
-  //   },
-  //   [selectedIndex]
-  // );
-
-  // useEffect(
-  //   () => {
-  //     console.log('Newly Focused:', focusedIndex);
-  //     setControlledFocusedIndex(focusedIndex);
-  //   },
-  //   [focusedIndex]
-  // );
+    return (
+      <OverridePage
+        {...getPageProps({
+          ...overridePageProps,
+          current: page === selectedItem,
+          focused: page === focusedItem,
+          key: `page-${page}`,
+          item: page,
+          page,
+          ref: pageRef,
+          focusRef: pageRef
+        })}
+      >
+        {page}
+      </OverridePage>
+    );
+  };
 
   const renderPages = () => {
     const pages = [];
 
-    // console.log('rendering pages');
+    for (let pageIndex = 1; pageIndex <= totalPages; pageIndex++) {
+      // Always display the current page
+      if (pageIndex === selectedItem) {
+        pages.push(createPage(pageIndex));
+        continue;
+      }
 
-    for (let x = 0; x < numPages; x++) {
-      pages.push(
-        <StyledPage
-          {...getPageProps({
-            current: x + 1 === selectedIndex,
-            focused: x + 1 === focusedIndex,
-            key: `page-${x}`,
-            page: x + 1,
-            ref: pageRefs[x],
-            onClick: () => {
-              // console.log(selectedIndex);
-              // console.log(focusedIndex);
-            }
-          })}
-        >
-          {x + 1}
-        </StyledPage>
-      );
+      // Always display the first and last page
+      if (pageIndex === 1 || pageIndex === totalPages) {
+        pages.push(createPage(pageIndex));
+        continue;
+      }
+
+      // Display pages used for padding around the current page
+      if (pageIndex >= selectedItem - pagePadding && pageIndex <= selectedItem + pagePadding) {
+        pages.push(createPage(pageIndex));
+        continue;
+      }
+
+      // Handle case where front gap should not be displayed
+      if (selectedItem <= pagePadding + 3 && pageIndex <= pagePadding * 2 + 3) {
+        pages.push(createPage(pageIndex));
+        continue;
+      }
+
+      // Handle case where back gap should not be displayed
+      if (
+        selectedItem >= totalPages - pagePadding - 2 &&
+        pageIndex >= totalPages - pagePadding * 2 - 4
+      ) {
+        pages.push(createPage(pageIndex));
+        continue;
+      }
+
+      // Render Gap and determine next starting pageIndex
+      if (pageIndex < selectedItem) {
+        pages.push(
+          <OverrideGap key={`gap-${pageIndex}`} {...overrideGapProps}>
+            ...
+          </OverrideGap>
+        );
+
+        if (selectedItem >= totalPages - pagePadding - 2) {
+          pageIndex = totalPages - pagePadding * 2 - 3;
+        } else {
+          pageIndex = selectedItem - pagePadding - 1;
+        }
+      } else {
+        pages.push(
+          <OverrideGap key={`gap-${pageIndex}`} {...overrideGapProps}>
+            ...
+          </OverrideGap>
+        );
+        pageIndex = totalPages - 1;
+      }
     }
 
     return pages;
   };
 
+  const renderPrevPage = () => {
+    const sharedProps = { ref: previousPageRef, key: 'previous-page' };
+
+    if (isPrevHidden) {
+      return <StyledPreviousPage {...sharedProps} hidden />;
+    }
+
+    return (
+      <OverridePreviousPage
+        {...getPreviousPageProps({
+          ...overridePreviousPageProps,
+          ...sharedProps,
+          current: selectedItem === 'prev',
+          focused: focusedItem === 'prev',
+          item: 'prev',
+          focusRef: previousPageRef
+        })}
+      />
+    );
+  };
+
+  const renderNextPage = () => {
+    const sharedProps = { ref: nextPageRef, key: 'next-page' };
+
+    if (isNextHidden) {
+      return <StyledNextPage {...sharedProps} hidden />;
+    }
+
+    return (
+      <OverrideNextPage
+        {...getNextPageProps({
+          ...overrideNextPageProps,
+          current: selectedItem === 'next',
+          focused: focusedItem === 'next',
+          item: 'next',
+          focusRef: nextPageRef,
+          ...sharedProps
+        })}
+      />
+    );
+  };
+
   return (
-    <StyledPagination {...getContainerProps()}>
-      <StyledPreviousPage
-        ref={previousPageRef}
-        key="previous-page"
-        current={selectedIndex === 0}
-        focused={focusedIndex === 0}
-        hidden={isPrevHidden}
-        {...(isPrevHidden ? {} : getPreviousPageProps())}
-      />
+    <OverridePagination {...getContainerProps(overridePaginationProps)}>
+      {renderPrevPage()}
       {renderPages()}
-      <StyledNextPage
-        ref={nextPageRef}
-        data-test-id={refs.length}
-        key="next-page"
-        current={selectedIndex === refs.length - 1}
-        focused={focusedIndex === refs.length - 1}
-        hidden={isNextHidden}
-        {...(isNextHidden ? {} : getNextPageProps())}
-      />
-    </StyledPagination>
+      {renderNextPage()}
+    </OverridePagination>
   );
 }
+
+Pagination.propTypes = {
+  currentPage: PropTypes.number,
+  totalPages: PropTypes.number,
+  pagePadding: PropTypes.number,
+  onChange: PropTypes.func,
+  overrides: PropTypes.object
+};
 
 export default Pagination;
