@@ -5,7 +5,7 @@
  * found at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-import useRovingTabIndex from './useRovingTabIndex';
+import useSelection from './useSelection';
 
 /**
  * A React Hook used to create accessible widgets with the Pagination Interaction Pattern
@@ -18,7 +18,7 @@ export default function usePagination(options) {
     focusedItem,
     getContainerProps: getControlledContainerProps,
     getItemProps
-  } = useRovingTabIndex(options);
+  } = useSelection(options);
 
   const getContainerProps = (props = {}) => {
     return {

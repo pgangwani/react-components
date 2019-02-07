@@ -46,7 +46,6 @@ function Pagination({
   const nextPageRef = useRef();
 
   const [controlledFocusedItem, setControlledFocusedItem] = useState();
-
   const [isPrevHidden, setIsPrevHidden] = useState(false);
   const [isNextHidden, setIsNextHidden] = useState(false);
 

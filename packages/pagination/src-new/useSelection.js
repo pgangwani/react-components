@@ -53,7 +53,7 @@ function stateReducer(items, selectedItem, focusedItem, action, onSelection, onF
 /**
  * Custom useSelection hook
  */
-function useRovingTabIndex({
+function useSelection({
   direction = DIRECTION.HORIZONTAL,
   selectedItem,
   focusedItem,
@@ -155,4 +155,4 @@ function useRovingTabIndex({
   };
 }
 
-export default useRovingTabIndex;
+export default useSelection;
