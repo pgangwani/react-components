@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line require-jsdoc
-export default function retrieveOverrideStyles(props) {
+export default function retrieveOverrideStyles(props: any) {
   if (props._internalOverrideStyling) {
     return props._internalOverrideStyling;
   }

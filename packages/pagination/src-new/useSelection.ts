@@ -5,15 +5,27 @@
  * found at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-import { useEffect } from 'react';
+import React, { useEffect, useRef, Ref } from 'react';
 
 import composeEventHandlers from './utils/composeEventHandlers';
 import KEY_CODES from './utils/KEY_CODES';
 import DIRECTION from './utils/DIRECTIONS';
 import ACTIONS from './utils/ACTIONS';
 
+interface IAction {
+  type: string;
+  payload?: any;
+}
+
 /* eslint-disable */
-function stateReducer(items, selectedItem, focusedItem, action, onSelection, onFocus) {
+function stateReducer(
+  items: any[],
+  selectedItem: any,
+  focusedItem: any,
+  action: IAction,
+  onSelection?: Function,
+  onFocus?: Function
+) {
   switch (action.type) {
     case ACTIONS.FOCUS:
       onFocus && onFocus(action.payload);
@@ -50,6 +62,14 @@ function stateReducer(items, selectedItem, focusedItem, action, onSelection, onF
 }
 /* eslint-enable */
 
+export interface IUseSelectionOptions {
+  direction?: any;
+  selectedItem?: any;
+  focusedItem?: any;
+  onSelect?: Function;
+  onFocus?: Function;
+}
+
 /**
  * Custom useSelection hook
  */
@@ -59,11 +79,11 @@ function useSelection({
   focusedItem,
   onSelect,
   onFocus
-} = {}) {
-  const refs = [];
-  const items = [];
+}: IUseSelectionOptions = {}) {
+  const refs: React.RefObject<HTMLElement>[] = [];
+  const items: any[] = [];
 
-  const dispatch = action => {
+  const dispatch = (action: IAction) => {
     stateReducer(items, selectedItem, focusedItem, action, onSelect, onFocus);
   };
 
@@ -71,12 +91,12 @@ function useSelection({
     () => {
       const focusedIndex = items.indexOf(focusedItem);
 
-      refs[focusedIndex] && refs[focusedIndex].current.focus();
+      refs[focusedIndex] && refs[focusedIndex].current!.focus();
     },
     [focusedItem]
   );
 
-  const getContainerProps = ({ role = 'listbox', ...other } = {}) => ({
+  const getContainerProps = ({ role = 'listbox', ...other }: any = {}) => ({
     role,
     ...other
   });
@@ -90,7 +110,7 @@ function useSelection({
     item,
     focusRef,
     ...other
-  } = {}) => {
+  }: any = {}) => {
     if (item === undefined || focusRef === undefined) {
       throw new Error('You messed up');
     }
@@ -108,7 +128,7 @@ function useSelection({
       onFocus: composeEventHandlers(onFocusCallback, () => {
         dispatch({ type: ACTIONS.FOCUS, payload: item });
       }),
-      onBlur: e => {
+      onBlur: (e: React.FocusEvent<HTMLElement>) => {
         if (e.target.tabIndex === 0) {
           dispatch({ type: ACTIONS.EXIT_WIDGET });
         }
@@ -116,7 +136,7 @@ function useSelection({
       onClick: composeEventHandlers(onClick, () => {
         dispatch({ type: ACTIONS.MOUSE_SELECT, payload: item });
       }),
-      onKeyDown: composeEventHandlers(onKeyDown, e => {
+      onKeyDown: composeEventHandlers(onKeyDown, (e: React.KeyboardEvent<HTMLElement>) => {
         if (
           (e.keyCode === KEY_CODES.UP && direction === DIRECTION.VERTICAL) ||
           (e.keyCode === KEY_CODES.LEFT && direction === DIRECTION.HORIZONTAL)

@@ -9,7 +9,7 @@
 
 import { isStyledComponent } from 'styled-components';
 
-function getOverride(override) {
+function getOverride(override: any) {
   if (override && typeof override === 'object') {
     return override.render;
   }
@@ -17,7 +17,7 @@ function getOverride(override) {
   return undefined;
 }
 
-function getOverrideProps(override) {
+function getOverrideProps(override: any) {
   if (override && typeof override === 'object') {
     return override.props || {};
   }
@@ -25,8 +25,8 @@ function getOverrideProps(override) {
   return {};
 }
 
-export default function getOverrides(override, defaultComponent) {
-  const component = getOverride(override) || defaultComponent;
+export default function getOverrides<T>(override: any, defaultComponent: T) {
+  const component: typeof defaultComponent = getOverride(override) || defaultComponent;
   const props = getOverrideProps(override);
 
   if (override && override.css && isStyledComponent(defaultComponent)) {

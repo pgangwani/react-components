@@ -17,6 +17,22 @@ import {
   StyledGap
 } from './styled-elements';
 
+export interface IOverrides {
+    Pagination?: any;
+    PreviousPage?: any;
+    NextPage?: any;
+    Page?: any;
+    Gap?: any;
+}
+
+export interface IPaginationProps {
+  currentPage: number;
+  totalPages: number;
+  pagePadding?: number;
+  overrides: IOverrides;
+  onChange?: (selectedItem: any) => void;
+}
+
 /**
  * Example Pagination component with hooks 🎣
  */
@@ -26,7 +42,7 @@ function Pagination({
   pagePadding = 2,
   overrides = {},
   onChange
-}) {
+}: IPaginationProps) {
   const [OverridePagination, overridePaginationProps] = getOverrides(
     overrides.Pagination,
     StyledPagination
@@ -42,10 +58,10 @@ function Pagination({
   );
   const [OverrideGap, overrideGapProps] = getOverrides(overrides.Gap, StyledGap);
 
-  const previousPageRef = useRef();
-  const nextPageRef = useRef();
+  const previousPageRef = useRef(null);
+  const nextPageRef = useRef(null);
 
-  const [controlledFocusedItem, setControlledFocusedItem] = useState();
+  const [controlledFocusedItem, setControlledFocusedItem] = useState<any>(undefined);
   const [isPrevHidden, setIsPrevHidden] = useState(false);
   const [isNextHidden, setIsNextHidden] = useState(false);
 
@@ -59,8 +75,8 @@ function Pagination({
   } = usePagination({
     selectedItem: currentPage,
     focusedItem: controlledFocusedItem,
-    onFocus: newFocusedItem => setControlledFocusedItem(newFocusedItem),
-    onSelect: newSelectedItem => {
+    onFocus: (newFocusedItem: any) => setControlledFocusedItem(newFocusedItem),
+    onSelect: (newSelectedItem: any) => {
       let modifiedNewSelectedItem = newSelectedItem;
 
       if (newSelectedItem === 'prev' && selectedItem > 1) {
@@ -100,7 +116,7 @@ function Pagination({
     [currentPage]
   );
 
-  const createPage = page => {
+  const createPage = (page: number) => {
     const pageRef = React.createRef();
 
     return (
@@ -188,7 +204,7 @@ function Pagination({
     const sharedProps = { ref: previousPageRef, key: 'previous-page' };
 
     if (isPrevHidden) {
-      return <StyledPreviousPage {...sharedProps} hidden />;
+      return <OverridePreviousPage {...overridePreviousPageProps} {...sharedProps} hidden />;
     }
 
     return (
@@ -209,7 +225,7 @@ function Pagination({
     const sharedProps = { ref: nextPageRef, key: 'next-page' };
 
     if (isNextHidden) {
-      return <StyledNextPage {...sharedProps} hidden />;
+      return <OverrideNextPage {...overrideNextPageProps} {...sharedProps} hidden />;
     }
 
     return (

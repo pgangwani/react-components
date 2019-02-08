@@ -54,10 +54,16 @@ const commonPageStyling = css`
   user-select: none;
 `;
 
+interface IPageProps {
+  current?: boolean;
+  focused?: boolean;
+  hovered?: boolean;
+}
+
 export const StyledPage = styled.li.attrs({
   'data-garden-id': 'pagination.page',
   'data-garden-version': PACKAGE_VERSION
-})`
+})<IPageProps>`
   ${commonPageStyling}
 
   ${props =>
@@ -92,20 +98,24 @@ export const StyledPage = styled.li.attrs({
   ${props => retrieveOverrideStyles(props)};
 `;
 
-StyledPage.propTypes = {
-  current: PropTypes.bool,
-  focused: PropTypes.bool,
-  hovered: PropTypes.bool
-};
+// StyledPage.propTypes = {
+//   current: PropTypes.bool,
+//   focused: PropTypes.bool,
+//   hovered: PropTypes.bool
+// };
 
 const styledNextPageWrapperHoveredStyling = css`
   color: ${zdColorGrey800};
 `;
 
+interface INavigationPageProps extends IPageProps {
+  hidden?: boolean;
+}
+
 const StyledNextPageWrapper = styled.li.attrs({
   'data-garden-id': 'pagination.next_page',
   'data-garden-version': PACKAGE_VERSION
-})`
+})<INavigationPageProps>`
   ${commonPageStyling}
 
   display: flex;
@@ -138,17 +148,17 @@ const StyledNextPageWrapper = styled.li.attrs({
   ${props => retrieveOverrideStyles(props)};
 `;
 
-export const StyledNextPage = React.forwardRef((props, ref) => (
+export const StyledNextPage = React.forwardRef<INavigationPageProps>((props, ref: any) => (
   <StyledNextPageWrapper ref={ref} {...props}>
     <ChevronRightIcon />
   </StyledNextPageWrapper>
 ));
 
-StyledNextPage.propTypes = {
-  focused: PropTypes.bool,
-  hovered: PropTypes.bool,
-  hidden: PropTypes.bool
-};
+// StyledNextPage.propTypes = {
+//   focused: PropTypes.bool,
+//   hovered: PropTypes.bool,
+//   hidden: PropTypes.bool
+// };
 
 const StyledPreviousPageWrapper = styled(StyledPage).attrs({
   'data-garden-id': 'pagination.previous_page',
@@ -183,18 +193,18 @@ const StyledPreviousPageWrapper = styled(StyledPage).attrs({
   ${props => retrieveOverrideStyles(props)};
 `;
 
-export const StyledPreviousPage = React.forwardRef((props, ref) => (
+export const StyledPreviousPage = React.forwardRef<HTMLLIElement>((props, ref: any) => (
   <StyledPreviousPageWrapper ref={ref} {...props}>
     <ChevronLeftIcon />
   </StyledPreviousPageWrapper>
 ));
 
-StyledPreviousPage.propTypes = {
-  current: PropTypes.bool,
-  focused: PropTypes.bool,
-  hovered: PropTypes.bool,
-  hidden: PropTypes.bool
-};
+// StyledPreviousPage.propTypes = {
+//   current: PropTypes.bool,
+//   focused: PropTypes.bool,
+//   hovered: PropTypes.bool,
+//   hidden: PropTypes.bool
+// };
 
 export const StyledGap = styled(StyledPage).attrs({
   'data-garden-id': 'pagination.gap',

@@ -21,9 +21,9 @@
  * @param {Function} fns the event hanlder functions
  * @return {Function} the event handler to add to an element
  */
-export default function composeEventHandlers(...fns) {
-  return (event, ...args) =>
-    fns.some(fn => {
+export default function composeEventHandlers(...fns: any) {
+  return (event: any, ...args: any) =>
+    fns.some((fn: any) => {
       fn && fn(event, ...args);
 
       return event && event.defaultPrevented;

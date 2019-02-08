@@ -5,14 +5,19 @@
  * found at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-import useSelection from './useSelection';
+import useSelection, { IUseSelectionOptions } from './useSelection';
+
+export interface IGetPageProps {
+  page?: number;
+  current?: boolean;
+}
 
 /**
  * A React Hook used to create accessible widgets with the Pagination Interaction Pattern
  *
  * https://www.w3.org/TR/wai-aria-practices/#Listbox
  */
-export default function usePagination(options) {
+export default function usePagination(options: IUseSelectionOptions) {
   const {
     selectedItem,
     focusedItem,
@@ -41,7 +46,7 @@ export default function usePagination(options) {
     };
   };
 
-  const getPageProps = ({ page, current, ...other } = {}) => {
+  const getPageProps = ({ page, current, ...other }: IGetPageProps = {}) => {
     let ariaLabel = `Page ${page}`;
 
     if (current) {
@@ -58,9 +63,9 @@ export default function usePagination(options) {
   return {
     selectedItem,
     focusedItem,
-    getContainerProps: props => getControlledContainerProps(getContainerProps(props)),
-    getPageProps: props => getItemProps(getPageProps(props)),
-    getPreviousPageProps: props => getItemProps(getPreviousPageProps(props)),
-    getNextPageProps: props => getItemProps(getNextPageProps(props))
+    getContainerProps: (props: any) => getControlledContainerProps(getContainerProps(props)),
+    getPageProps: (props: any) => getItemProps(getPageProps(props)),
+    getPreviousPageProps: (props: any) => getItemProps(getPreviousPageProps(props)),
+    getNextPageProps: (props: any) => getItemProps(getNextPageProps(props))
   };
 }

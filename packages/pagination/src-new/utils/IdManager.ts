@@ -20,7 +20,7 @@ function generateId(prefix = 'garden') {
  * This is only used in tests... Could be useful in SSR?
  * @param {Number} num The number to set the idCountry to
  */
-function setIdCounter(num) {
+function setIdCounter(num: number) {
   idCounter = num;
 }
 
