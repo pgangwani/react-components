@@ -1,12 +1,85 @@
 ```jsx
-<Autocomplete>
-  <Autocomplete.Menu>
-    <Autocomplete.Item value="item-1">Item 1</Autocomplete.Item>
-    <Autocomplete.Item value="item-2">Item 2</Autocomplete.Item>
-    <Autocomplete.Item value="item-3">Item 3</Autocomplete.Item>
-    <Autocomplete.Item value="item-4">Item 4</Autocomplete.Item>
-  </Autocomplete.Menu>
-</Autocomplete>
+const colors = {
+  'Support Green': '#78A300',
+  'Message Green': '#37B8AF',
+  'Explore Blue': '#30AABC',
+  'Guide Pink': '#EB4962',
+  'Connect Red': '#EB6651',
+  'Chat Orange': '#F79A3E',
+  'Talk Yellow': '#EFC93D',
+  'Sell Gold': '#D4AE5E'
+};
+
+const ColorSampleSquare = styled.div`
+  background-color: ${props => props.color};
+  width: 1em;
+  height: 1em;
+`;
+
+const ColorSamplePreview = styled.div`
+  cursor: default;
+  display: inline-block;
+`;
+
+const InlineItem = styled.div`
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+`;
+
+const StyledNoItemsMessage = styled.div`
+  margin: 16px;
+  text-align: center;
+`;
+
+const Color = ({ name, color, includeSample }) =>
+  includeSample ? (
+    <div style={{ display: 'inline-block' }}>
+      <InlineItem>
+        <ColorSampleSquare color={color} />
+      </InlineItem>
+      <InlineItem>{name}</InlineItem>
+      <InlineItem>({color})</InlineItem>
+    </div>
+  ) : (
+    <ColorSamplePreview>
+      {name} (<span style={{ color }}>{color}</span>)
+    </ColorSamplePreview>
+  );
+
+initialState = {
+  inputValue: '',
+  selectedItem: 'Support Green'
+};
+
+const renderItems = () => {
+  const items = Object.keys(colors).filter(color => {
+    return !state.inputValue || color.toLowerCase().includes(state.inputValue.toLowerCase());
+  });
+
+  if (items.length === 0) {
+    return <StyledNoItemsMessage>No items found</StyledNoItemsMessage>;
+  }
+
+  return items.map(option => (
+    <Autocomplete.Item key={option} value={option}>
+      <Color color={colors[option]} name={option} includeSample />
+    </Autocomplete.Item>
+  ));
+};
+
+<Autocomplete
+  inputValue={state.inputValue}
+  onInputValueChange={inputValue => setState({ inputValue })}
+  selectedItem={state.selectedItem}
+  onSelect={selectedItem => setState({ selectedItem })}
+>
+  <Autocomplete.Label>Product Color Example</Autocomplete.Label>
+  <Autocomplete.Preview>
+    <Color color={colors[state.selectedItem]} name={state.selectedItem} />
+  </Autocomplete.Preview>
+  <Autocomplete.Menu>{renderItems()}</Autocomplete.Menu>
+</Autocomplete>;
 ```
 
 ```jsx

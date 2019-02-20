@@ -5,19 +5,30 @@
  * found at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useRef,
+  useEffect,
+  useLayoutEffect
+} from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Downshift from 'downshift';
 import { Manager, Reference, Popper } from 'react-popper';
 import { KEY_CODES } from '@zendeskgarden/react-selection';
 import { MenuView, Item as MenuItem } from '@zendeskgarden/react-menus';
-import { TextGroup, Label, FauxInput, Input, Hint, Message } from '@zendeskgarden/react-textfields';
+import { TextGroup, Label, FauxInput, Input } from '@zendeskgarden/react-textfields';
 
 const StyledMenuOverflow = styled.div`
   overflow-y: auto;
   max-height: ${props => props.maxHeight || 'inherit'};
 `;
+
+StyledMenuOverflow.propTypes = {
+  maxHeight: PropTypes.string
+};
 
 const StyledInput = styled(Input).attrs({ bare: true })`
   ${props =>
@@ -33,8 +44,20 @@ const StyledInput = styled(Input).attrs({ bare: true })`
   `}
 `;
 
+StyledInput.propTypes = {
+  isOpen: PropTypes.bool
+};
+
+const StyledMenuWrapper = styled.div`
+  z-index: ${props => props.zIndex};
+`;
+
+StyledMenuWrapper.propTypes = {
+  zIndex: PropTypes.number
+};
+
 const AutocompleteContext = createContext({});
-const AutocompleteMenuContext = createContext(0);
+const MenuContext = createContext(0);
 
 /**
  * utility to ensure all static elements are used within a parent Autocomplete
@@ -52,102 +75,100 @@ function useDownshiftContext(componentName) {
 /**
  * Test Autocomplete with Hooks
  */
-function Autocomplete({ onChange, inputValue, onInputValueChange, itemToString, children }) {
-  const [isOpen, setIsOpen] = useState(false);
+function Autocomplete({
+  isOpen,
+  onOpen,
+  highlightedIndex,
+  onHighlight,
+  selectedItem,
+  onSelect,
+  inputValue,
+  onInputValueChange,
+  itemToString,
+  children
+}) {
+  const [controlledIsOpen, setControlledIsOpen] = useState(false);
+  const [controlledHighlightedIndex, setControlledHighlightedIndex] = useState(null);
+  const [controlledSelectedItem, setControlledSelectedItem] = useState(null);
+  const [controlledInputValue, setControlledInputValue] = useState('');
   const [isHovered, setIsHovered] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [highlightedIndex, setHighlightedIndex] = useState(null);
-
   const inputWrapperRef = useRef(null);
-  const inputRef = useRef(null);
+  const firstItemRef = useRef(null);
+
+  const onOpenCallback = value => {
+    if (isOpen === undefined) {
+      setControlledIsOpen(value);
+    }
+
+    onOpen && onOpen(value);
+  };
+
+  const onHighlightCallback = value => {
+    if (highlightedIndex === undefined) {
+      setControlledHighlightedIndex(value);
+    }
+
+    onHighlight && onHighlight(value);
+  };
+
+  const onSelectCallback = value => {
+    if (selectedItem === undefined) {
+      setControlledSelectedItem(value);
+    }
+
+    onSelect && onSelect(value);
+  };
+
+  const onInputCallback = value => {
+    if (inputValue === undefined) {
+      setControlledInputValue(value);
+    }
+
+    onInputValueChange && onInputValueChange(value);
+  };
 
   return (
     <Manager>
       <Downshift
-        isOpen={isOpen}
-        inputValue={inputValue}
-        selectedItem={selectedItem}
-        highlightedIndex={highlightedIndex}
+        isOpen={isOpen === undefined ? controlledIsOpen : isOpen}
+        highlightedIndex={
+          highlightedIndex === undefined ? controlledHighlightedIndex : highlightedIndex
+        }
+        selectedItem={selectedItem === undefined ? controlledSelectedItem : selectedItem}
+        inputValue={inputValue === undefined ? controlledInputValue : inputValue}
         itemToString={itemToString}
         onStateChange={changes => {
           if (Object.prototype.hasOwnProperty.call(changes, 'isOpen')) {
-            setIsOpen(changes.isOpen);
+            onOpenCallback(changes.isOpen);
           }
 
           if (Object.prototype.hasOwnProperty.call(changes, 'highlightedIndex')) {
-            setHighlightedIndex(changes.highlightedIndex);
+            onHighlightCallback(changes.highlightedIndex);
           }
 
           if (Object.prototype.hasOwnProperty.call(changes, 'selectedItem')) {
-            setSelectedItem(changes.selectedItem);
-            onChange && onChange(changes.selectedItem);
-            onInputValueChange('');
+            onSelectCallback(changes.selectedItem);
+            onInputCallback('');
           }
-        }}
-        onOuterClick={() => {
-          setIsOpen(false);
         }}
       >
         {downshiftInternals => (
-          <div>
-            <Reference>
-              {({ ref }) => (
-                <TextGroup>
-                  <Label
-                    {...downshiftInternals.getLabelProps({
-                      onMouseEnter: () => {
-                        setIsHovered(true);
-                      },
-                      onMouseLeave: () => {
-                        setIsHovered(false);
-                      }
-                    })}
-                  >
-                    Test Label
-                  </Label>
-                  <FauxInput
-                    select
-                    open={isOpen}
-                    hovered={isHovered}
-                    innerRef={fauxInputRef => {
-                      ref(fauxInputRef);
-                      inputWrapperRef.current = fauxInputRef;
-                    }}
-                    onClick={() => {
-                      inputRef.current && inputRef.current.focus();
-                      setIsOpen(true);
-                    }}
-                  >
-                    {!isOpen && <span>{selectedItem && selectedItem}</span>}
-                    <StyledInput
-                      {...downshiftInternals.getInputProps({
-                        innerRef: inputRef,
-                        isOpen,
-                        onChange: e => {
-                          onInputValueChange && onInputValueChange(e.target.value);
-                        },
-                        onKeyDown: e => {
-                          if (e.keyCode === KEY_CODES.ENTER || e.keyCode === KEY_CODES.SPACE) {
-                            setIsOpen(true);
-
-                            e.preventDefault();
-                          }
-                        },
-                        onClick: () => {
-                          setIsOpen(true);
-                        }
-                      })}
-                    />
-                  </FauxInput>
-                </TextGroup>
-              )}
-            </Reference>
+          <TextGroup {...downshiftInternals.getRootProps({ refKey: 'innerRef' })}>
             <AutocompleteContext.Provider
-              value={{ setHighlightedIndex, inputWrapperRef, ...downshiftInternals }}
+              value={{
+                isHovered,
+                setIsHovered,
+                onOpenCallback,
+                onSelectCallback,
+                onInputCallback,
+                inputWrapperRef,
+                firstItemRef,
+                ...downshiftInternals
+              }}
             >
               {children}
             </AutocompleteContext.Provider>
-          </div>
+          </TextGroup>
         )}
       </Downshift>
     </Manager>
@@ -157,13 +178,111 @@ function Autocomplete({ onChange, inputValue, onInputValueChange, itemToString, 
 /**
  * Component to nest within Autocomplete
  */
-function Menu({ children, maxHeight, style, ...props }) {
-  const { getMenuProps, isOpen, inputWrapperRef } = useDownshiftContext('Menu');
+function AutocompleteLabel(props) {
+  const { getLabelProps, setIsHovered } = useDownshiftContext('Label');
+
+  return (
+    <Label
+      {...getLabelProps({
+        ...props,
+        onMouseEnter: () => {
+          setIsHovered(true);
+        },
+        onMouseLeave: () => {
+          setIsHovered(false);
+        }
+      })}
+    />
+  );
+}
+
+/**
+ * Component to nest within Autocomplete
+ **/
+function Preview({ children, ...props }) {
+  const {
+    getInputProps,
+    highlightedIndex,
+    isOpen,
+    isHovered,
+    onInputCallback,
+    onSelectCallback,
+    onOpenCallback,
+    inputWrapperRef,
+    firstItemRef
+  } = useDownshiftContext('Input');
+
+  const inputRef = useRef(null);
+
+  return (
+    <Reference>
+      {({ ref }) => (
+        <FauxInput
+          select
+          open={isOpen}
+          hovered={isHovered}
+          innerRef={fauxInputRef => {
+            ref(fauxInputRef);
+            inputWrapperRef.current = fauxInputRef;
+          }}
+          onClick={() => {
+            inputRef.current && inputRef.current.focus();
+            onOpenCallback(true);
+          }}
+          {...props}
+        >
+          {!isOpen && children}
+          <StyledInput
+            {...getInputProps({
+              innerRef: inputRef,
+              isOpen,
+              onChange: e => {
+                onInputCallback(e.target.value);
+              },
+              onKeyDown: e => {
+                if (!isOpen && (e.keyCode === KEY_CODES.ENTER || e.keyCode === KEY_CODES.SPACE)) {
+                  onOpenCallback(true);
+                  e.preventDefault();
+                }
+
+                if (
+                  isOpen &&
+                  highlightedIndex === null &&
+                  (e.target.value && e.target.value.trim().length !== 0) &&
+                  e.keyCode === KEY_CODES.ENTER &&
+                  firstItemRef.current !== null
+                ) {
+                  onSelectCallback(firstItemRef.current);
+                  onOpenCallback(false);
+                  onInputCallback('');
+                }
+              },
+              onClick: () => {
+                onOpenCallback(true);
+              }
+            })}
+          />
+        </FauxInput>
+      )}
+    </Reference>
+  );
+}
+
+Preview.propTypes = {
+  children: PropTypes.node
+};
+
+/**
+ * Component to nest within Autocomplete
+ */
+function Menu({ children, maxHeight, zIndex, style, ...props }) {
+  const { getMenuProps, isOpen, inputWrapperRef, firstItemRef } = useDownshiftContext('Menu');
   const currentIndexRef = useRef(0);
   const popperScheduleUpdateRef = useRef(null);
 
-  // Reset to 0 on every re-render
-  useEffect(() => {
+  // Ensure all items are rendered before resetting
+  useLayoutEffect(() => {
+    firstItemRef.current = null;
     currentIndexRef.current = 0;
     popperScheduleUpdateRef.current && popperScheduleUpdateRef.current();
   });
@@ -173,14 +292,14 @@ function Menu({ children, maxHeight, style, ...props }) {
     : 0;
 
   return (
-    <AutocompleteMenuContext.Provider value={{ currentIndexRef }}>
+    <MenuContext.Provider value={{ currentIndexRef }}>
       {isOpen && (
         <Popper placement="bottom">
           {({ ref, style: popperStyle, scheduleUpdate, placement }) => {
             popperScheduleUpdateRef.current = scheduleUpdate;
 
             return (
-              <div ref={ref} style={popperStyle}>
+              <StyledMenuWrapper innerRef={ref} zIndex={zIndex} style={popperStyle}>
                 <MenuView
                   {...getMenuProps({
                     refKey: 'innerRef',
@@ -191,36 +310,47 @@ function Menu({ children, maxHeight, style, ...props }) {
                 >
                   <StyledMenuOverflow maxHeight={maxHeight}>{children}</StyledMenuOverflow>
                 </MenuView>
-              </div>
+              </StyledMenuWrapper>
             );
           }}
         </Popper>
       )}
-    </AutocompleteMenuContext.Provider>
+    </MenuContext.Provider>
   );
 }
 
 Menu.propTypes = {
   children: PropTypes.node,
   maxHeight: PropTypes.string,
+  zIndex: PropTypes.number,
   style: PropTypes.object
 };
+
 Menu.defaultProps = {
-  maxHeight: '350px'
+  maxHeight: '350px',
+  zIndex: 1000
 };
 
 /**
  * Component to nest within Autocomplete
  */
 function Item({ value, component = MenuItem, ...props }) {
-  const { currentIndexRef } = useContext(AutocompleteMenuContext);
-  const { getItemProps, selectedItem, highlightedIndex } = useDownshiftContext('Item');
+  const { currentIndexRef } = useContext(MenuContext);
+  const { getItemProps, selectedItem, highlightedIndex, firstItemRef } = useDownshiftContext(
+    'Item'
+  );
 
   const currentIndex = currentIndexRef.current;
   const isSelected = selectedItem === value;
   const isFocused = currentIndex === highlightedIndex;
 
   currentIndexRef.current++;
+
+  useEffect(() => {
+    if (firstItemRef.current === null) {
+      firstItemRef.current = value;
+    }
+  });
 
   return React.createElement(
     component,
@@ -238,10 +368,21 @@ Item.propTypes = {
   component: PropTypes.any
 };
 
+Autocomplete.Label = AutocompleteLabel;
+Autocomplete.Preview = Preview;
 Autocomplete.Menu = Menu;
 Autocomplete.Item = Item;
 Autocomplete.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
+  isOpen: PropTypes.bool,
+  onOpen: PropTypes.func,
+  highlightedIndex: PropTypes.number,
+  onHighlight: PropTypes.func,
+  selectedItem: PropTypes.any,
+  onSelect: PropTypes.func,
+  inputValue: PropTypes.string,
+  onInputValueChange: PropTypes.func,
+  itemToString: PropTypes.func
 };
 
 export default Autocomplete;
