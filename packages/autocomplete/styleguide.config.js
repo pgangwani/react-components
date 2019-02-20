@@ -18,7 +18,10 @@ module.exports = {
     },
     {
       name: 'Elements',
-      components: '../../packages/autocomplete/src/elements/[A-Z]*.js'
+      components: [
+        '../../packages/autocomplete/src/elements/[A-Z]*.js',
+        '../../packages/autocomplete/src/elements/Autocomplete/Autocomplete.js'
+      ]
     }
     // {
     //   name: 'Containers',
