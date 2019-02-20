@@ -1,32 +1,13 @@
-### Basic Example
-
 ```jsx
-initialState = {
-  selectedValue: 'option-1'
-};
-
-<Autocomplete
-  label="Basic Autocomplete"
-  selectedValue={state.selectedValue}
-  onChange={selectedValue => setState({ selectedValue })}
-  options={[
-    {
-      value: 'option-1',
-      label: 'Option 1'
-    },
-    {
-      value: 'option-2',
-      label: 'Option 2'
-    },
-    {
-      value: 'option-3',
-      label: 'Option 3'
-    }
-  ]}
-/>;
+<Autocomplete>
+  <Autocomplete.Menu>
+    <Autocomplete.Item value="item-1">Item 1</Autocomplete.Item>
+    <Autocomplete.Item value="item-2">Item 2</Autocomplete.Item>
+    <Autocomplete.Item value="item-3">Item 3</Autocomplete.Item>
+    <Autocomplete.Item value="item-4">Item 4</Autocomplete.Item>
+  </Autocomplete.Menu>
+</Autocomplete>
 ```
-
-### Advanced Example
 
 ```jsx
 const phonetics = [
@@ -57,6 +38,7 @@ const phonetics = [
   'Yankee',
   'Zulu'
 ];
+
 const options = [];
 
 for (let x = 0; x < phonetics.length; x++) {
@@ -67,14 +49,32 @@ for (let x = 0; x < phonetics.length; x++) {
 }
 
 initialState = {
-  selectedValue: options[0].value
+  inputValue: '',
+  selectedItem: options[0]
+};
+
+const renderItems = () => {
+  const items = options.filter(option => {
+    return !state.inputValue || option.label.toLowerCase().includes(state.inputValue.toLowerCase());
+  });
+
+  if (items.length === 0) {
+    return <div>No items found</div>;
+  }
+
+  return items.map(option => (
+    <Autocomplete.Item key={option.value} value={option.value}>
+      {option.label}
+    </Autocomplete.Item>
+  ));
 };
 
 <Autocomplete
-  label="Example Autocomplete"
-  maxHeight="300px"
-  selectedValue={state.selectedValue}
-  onChange={selectedValue => setState({ selectedValue })}
-  options={options}
-/>;
+  inputValue={state.inputValue}
+  onInputValueChange={inputValue => setState({ inputValue })}
+  onChange={selectedItem => setState({ selectedItem })}
+>
+  <p>{state.inputValue}</p>
+  <Autocomplete.Menu>{renderItems()}</Autocomplete.Menu>
+</Autocomplete>;
 ```

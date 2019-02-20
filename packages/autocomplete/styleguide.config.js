@@ -19,19 +19,19 @@ module.exports = {
     {
       name: 'Elements',
       components: '../../packages/autocomplete/src/elements/[A-Z]*.js'
-    },
-    {
-      name: 'Containers',
-      components: '../../packages/autocomplete/src/containers/[A-Z]*.js'
-    },
-    {
-      name: 'Examples',
-      sections: [
-        {
-          name: 'Multi-Select',
-          content: '../../packages/autocomplete/src/examples/multiselect.md'
-        }
-      ]
     }
+    // {
+    //   name: 'Containers',
+    //   components: '../../packages/autocomplete/src/containers/[A-Z]*.js'
+    // },
+    // {
+    //   name: 'Examples',
+    //   sections: [
+    //     {
+    //       name: 'Multi-Select',
+    //       content: '../../packages/autocomplete/src/examples/multiselect.md'
+    //     }
+    //   ]
+    // }
   ]
 };
