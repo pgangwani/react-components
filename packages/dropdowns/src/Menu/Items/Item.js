@@ -5,7 +5,7 @@
  * found at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import StyledItem from '../../styled/items/StyledItem';
@@ -15,9 +15,23 @@ import useMenuContext from '../../utils/useMenuContext';
 // eslint-disable-next-line react/prop-types
 const Item = ({ value, disabled, component = StyledItem, ...props }) => {
   const {
-    downshift: { selectedItem, highlightedIndex, getItemProps }
+    downshift: { selectedItem, highlightedIndex, getItemProps, setHighlightedIndex }
   } = useDropdownContext();
   const { itemIndexRef } = useMenuContext();
+
+  if (!value && !disabled) {
+    throw new Error('All Item components require a `value` prop');
+  }
+
+  const currentIndex = itemIndexRef.current;
+  const isFocused = highlightedIndex === currentIndex;
+  const isSelected = selectedItem === value;
+
+  useEffect(() => {
+    if (!disabled && isSelected && highlightedIndex === null) {
+      setHighlightedIndex(currentIndex);
+    }
+  });
 
   if (disabled) {
     return React.createElement(component, {
@@ -25,13 +39,6 @@ const Item = ({ value, disabled, component = StyledItem, ...props }) => {
       ...props
     });
   }
-
-  if (!value) {
-    throw new Error('All Item components require a `value` prop');
-  }
-
-  const isFocused = highlightedIndex === itemIndexRef.current;
-  const isSelected = selectedItem === value;
 
   itemIndexRef.current++;
 

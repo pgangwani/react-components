@@ -187,16 +187,18 @@ const renderItems = () => {
 <Dropdown
   isOpen={state.isOpen}
   onOpen={isOpen => {
-    setState({ isOpen, isLoading: true, tempSelectedItem: undefined }, () => {
-      if (isOpen) {
-        setTimeout(() => {
-          setState({ isLoading: false });
-        }, 750);
+    setState({ isOpen, isLoading: false, tempSelectedItem: undefined });
+  }}
+  onSelect={(item, stateAndHelpers) => {
+    const isOpen = item === 'specific-settings' || item === 'general-settings';
+
+    setState({ tempSelectedItem: item, isOpen }, () => {
+      if (item === 'specific-settings') {
+        stateAndHelpers.setHighlightedIndex(1);
+      } else if (item === 'general-settings') {
+        stateAndHelpers.setHighlightedIndex(3);
       }
     });
-  }}
-  onSelect={item => {
-    setState({ tempSelectedItem: item });
   }}
 >
   <Trigger>
@@ -204,7 +206,7 @@ const renderItems = () => {
       <Button {...getTriggerProps({ active: isOpen, innerRef: ref })}>Async Tree Layout</Button>
     )}
   </Trigger>
-  <Menu placement="end" arrow style={{ width: 400, height: 300 }}>
+  <Menu placement="end" arrow style={{ width: 200, height: 300 }}>
     <Container initialPose="exit" pose="enter" style={{ height: '100%' }}>
       {renderItems()}
     </Container>

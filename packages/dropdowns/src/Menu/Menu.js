@@ -8,23 +8,25 @@
 import React, { createContext } from 'react';
 import PropTypes from 'prop-types';
 import { Popper } from 'react-popper';
+import { withTheme, isRtl } from '@zendeskgarden/react-theming';
 
 import StyledMenu from '../styled/StyledMenu';
 import useDropdownContext from '../utils/useDropdownContext';
-import { getPopperPlacement } from '../utils/placements';
+import { getPopperPlacement, getRtlPopperPlacement } from '../utils/placements';
 
 export const MenuContext = createContext();
 
-const Menu = ({
-  placement,
-  popperModifiers,
-  eventsEnabled,
-  animate,
-  maxHeight,
-  style: menuStyle,
-  zIndex,
-  ...props
-}) => {
+const Menu = props => {
+  const {
+    placement,
+    popperModifiers,
+    eventsEnabled,
+    animate,
+    maxHeight,
+    style: menuStyle,
+    zIndex,
+    ...otherProps
+  } = props;
   const {
     itemIndexRef,
     previousItemRef,
@@ -37,13 +39,15 @@ const Menu = ({
   itemIndexRef.current = 0;
   nextItemsHashRef.current = {};
   previousItemRef.current = undefined;
-  previousIndexRef.current = 0;
+  previousIndexRef.current = undefined;
 
   if (!isOpen) {
     return null;
   }
 
-  const popperPlacement = getPopperPlacement(placement);
+  const popperPlacement = isRtl(props)
+    ? getRtlPopperPlacement(placement)
+    : getPopperPlacement(placement);
 
   return (
     <MenuContext.Provider value={{ itemIndexRef }}>
@@ -67,7 +71,7 @@ const Menu = ({
                   placement: currentPlacement,
                   animate,
                   style: computedStyle,
-                  ...props
+                  ...otherProps
                 })}
               />
             </div>
@@ -96,4 +100,4 @@ Menu.defaultProps = {
   zIndex: 1000
 };
 
-export default Menu;
+export default withTheme(Menu);

@@ -9,29 +9,35 @@ import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import Downshift from 'downshift';
 import { Manager } from 'react-popper';
+import { withTheme, isRtl } from '@zendeskgarden/react-theming';
 import { KEY_CODES, composeEventHandlers } from '@zendeskgarden/react-selection';
 
 export const DropdownContext = React.createContext();
 
-const Dropdown = ({
-  children,
-  isOpen,
-  onOpen,
-  selectedItem,
-  onSelect,
-  highlightedIndex,
-  onHighlight,
-  itemToString
-}) => {
+const Dropdown = props => {
+  const {
+    children,
+    isOpen,
+    onOpen,
+    selectedItem,
+    onSelect,
+    highlightedIndex,
+    onHighlight,
+    dropdownProps,
+    itemToString
+  } = props;
   const itemIndexRef = useRef(0);
   const previousItemRef = useRef(undefined);
   const previousIndexRef = useRef(undefined);
   const nextItemsHashRef = useRef({});
   const popperReferenceElementRef = useRef(null);
 
-  const customGetInputProps = ({ onKeyDown, ...other }, downshift) => {
+  const customGetInputProps = ({ onKeyDown, ...other }, downshift, rtl) => {
     return {
       onKeyDown: composeEventHandlers(onKeyDown, e => {
+        const PREVIOUS_KEY = rtl ? KEY_CODES.RIGHT : KEY_CODES.LEFT;
+        const NEXT_KEY = rtl ? KEY_CODES.LEFT : KEY_CODES.RIGHT;
+
         if (downshift.isOpen) {
           if (e.keyCode === KEY_CODES.TAB) {
             e.preventDefault();
@@ -40,14 +46,14 @@ const Dropdown = ({
             downshift.selectHighlightedItem();
           }
 
-          if (e.keyCode === KEY_CODES.LEFT && downshift.highlightedIndex !== null) {
+          if (e.keyCode === PREVIOUS_KEY && previousIndexRef.current !== null) {
             e.preventDefault();
             e.stopPropagation();
 
             downshift.selectItemAtIndex(previousIndexRef.current);
           }
 
-          if (e.keyCode === KEY_CODES.RIGHT) {
+          if (e.keyCode === NEXT_KEY) {
             const nextItemIndexes = Object.values(nextItemsHashRef.current);
 
             if (nextItemIndexes.includes(downshift.highlightedIndex)) {
@@ -70,8 +76,8 @@ const Dropdown = ({
 
   const transformDownshift = ({ getInputProps, getToggleButtonProps, ...downshift }) => {
     return {
-      getInputProps: props => getInputProps(customGetInputProps(props, downshift)),
-      getToggleButtonProps: props => getToggleButtonProps({ 'aria-label': undefined, ...props }),
+      getInputProps: p => getInputProps(customGetInputProps(p, downshift, isRtl(props))),
+      getToggleButtonProps: p => getToggleButtonProps({ 'aria-label': undefined, ...p }),
       ...downshift
     };
   };
@@ -87,47 +93,20 @@ const Dropdown = ({
         isOpen={isOpen}
         selectedItem={selectedItem || null}
         highlightedIndex={highlightedIndex}
-        onStateChange={changes => {
+        onStateChange={(changes, stateAndHelpers) => {
           if (Object.prototype.hasOwnProperty.call(changes, 'isOpen')) {
-            onOpen && onOpen(changes.isOpen);
+            onOpen && onOpen(changes.isOpen, stateAndHelpers);
           }
 
           if (Object.prototype.hasOwnProperty.call(changes, 'selectedItem')) {
-            onSelect && onSelect(changes.selectedItem);
+            onSelect && onSelect(changes.selectedItem, stateAndHelpers);
           }
 
           if (Object.prototype.hasOwnProperty.call(changes, 'highlightedIndex')) {
-            onHighlight && onHighlight(changes.highlightedIndex);
+            onHighlight && onHighlight(changes.highlightedIndex, stateAndHelpers);
           }
         }}
-        stateReducer={(state, changes) => {
-          switch (changes.type) {
-            case undefined:
-            case Downshift.stateChangeTypes.keyDownEnter:
-            case Downshift.stateChangeTypes.clickItem: {
-              let computedIsOpen = state.isOpen;
-
-              if (Object.prototype.hasOwnProperty.call(changes, 'isOpen')) {
-                computedIsOpen = changes.isOpen;
-              }
-
-              if (Object.prototype.hasOwnProperty.call(changes, 'selectedItem')) {
-                const isPreviousItemSelected = changes.selectedItem === previousItemRef.current;
-                const isNextItemSelected =
-                  nextItemsHashRef.current[changes.selectedItem] !== undefined;
-
-                computedIsOpen = isPreviousItemSelected || isNextItemSelected;
-              }
-
-              return {
-                ...changes,
-                isOpen: computedIsOpen
-              };
-            }
-            default:
-              return changes;
-          }
-        }}
+        {...dropdownProps}
       >
         {downshift => (
           <DropdownContext.Provider
@@ -157,7 +136,8 @@ Dropdown.propTypes = {
   onSelect: PropTypes.func,
   highlightedIndex: PropTypes.number,
   onHighlight: PropTypes.func,
-  itemToString: PropTypes.func
+  itemToString: PropTypes.func,
+  dropdownProps: PropTypes.object
 };
 
-export default Dropdown;
+export default withTheme(Dropdown);

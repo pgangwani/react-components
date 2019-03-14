@@ -37,9 +37,5 @@ module.exports = {
         }
       ]
     }
-    // {
-    //   name: 'Styled',
-    //   components: '../../packages/dropdowns/src/styled/**/[A-Z]*.js'
-    // }
   ]
 };
